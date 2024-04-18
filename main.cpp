@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <vector>
 using namespace std;
 
 /*Создайте абстрактный класс "Task" с следующими чисто виртуальными методами:
@@ -75,3 +76,62 @@ getNote(int index) - для получения заметки по индекс�
 
 Создайте консольное меню для пользователя, позволяющее добавлять задачи и заметки,
 отмечать задачи как выполненные, отображать список задач и заметок, а также сравнивать задачи по приоритету.*/
+enum class Priority {
+    Low,
+    Medium,
+    High
+};
+
+class Note {
+public:
+    string text;
+};
+
+class TaskList {
+private:
+    vector<TaskItem> tasks;
+    vector<Note> notes;
+
+public:
+    void addTask(const TaskItem& task) {
+        tasks.push_back(task);
+    }
+
+    void addNote(const Note& note) {
+        notes.push_back(note);
+    }
+
+    void displayAll() {
+        for (const auto& task : tasks) {
+            task.display();
+        }
+    }
+
+    TaskItem getTask(int index) {
+        if (index >= 0 && index < tasks.size()) {
+            return tasks[index];
+        } else {
+        // Возвращаем "пустую" задачу
+        return TaskItem();
+    }
+}
+
+  Note getNote(int index) {
+    if (index >= 0 && index < notes.size()) {
+        return notes[index];
+    } else {
+        // Возвращаем "пустую" заметку
+        return Note();
+    }
+}
+
+    static int getTotalTasks() {
+        return tasks.size();
+    }
+
+    friend bool compareByPriority(const TaskItem& task1, const TaskItem& task2);
+};
+
+bool compareByPriority(const TaskItem& task1, const TaskItem& task2) {
+    return task1.getPriority() > task2.getPriority();
+}
