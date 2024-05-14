@@ -3,83 +3,46 @@
 #include <vector>
 using namespace std;
 
-/*Создайте абстрактный класс "Task" с следующими чисто виртуальными методами:
-
-virtual void display() - для отображения информации о задаче.
-virtual bool isCompleted() - для проверки выполнена ли задача.
-virtual void markAsCompleted() - для отметки задачи как выполненной.*/
 class Task {
 public:
-    // Чисто виртуальный метод для отображения информации о задаче
-    virtual void display() = 0;
-
-    // Чисто виртуальный метод для проверки, выполнена ли задача
-    virtual bool isCompleted() = 0;
-
-    // Чисто виртуальный метод для отметки задачи как выполненной
+    virtual void display() const = 0;
+    virtual bool isCompleted() const = 0;
     virtual void markAsCompleted() = 0;
 };
-/*Создайте класс "TaskItem", который наследует абстрактный класс "Task" и содержит следующие поля:
 
-string title - заголовок задачи.
-string description - описание задачи.
-bool completed - флаг, который указывает, выполнена ли задача.
-Класс "TaskItem" должен иметь конструктор, который принимает заголовок и описание задачи, 
-а также методы для отображения информации о задаче и отметки задачи как выполненной.*/
-class TaskItem : public Task {
-private:
-    string title;       // Заголовок задачи
-    string description; // Описание задачи
-    bool completed;    // Флаг, указывающий, выполнена ли задача
-
-public:
-    // Конструктор, который принимает заголовок и описание задачи
-    TaskItem(string title_, string description_) {
-        title = title_;
-        description = description_;
-        completed = false;
-    }
-
-   // Метод для отображения информации о задаче
-    void display() override {
-        cout << "Title: " << title << endl;
-        cout << "Description: " << description << endl;
-        cout << "Completed: ";
-        if (completed) {
-        cout << "Yes"<< endl; } else {
-        cout << "No"<< endl; }
-    }
-
-    // Метод для проверки, выполнена ли задача
-    bool isCompleted() override {
-        return completed;
-    }
-
-    // Метод для отметки задачи как выполненной
-    void markAsCompleted() override {
-        completed = true;
-    }
-
-};
-/*Создайте класс "TaskList" для хранения списка задач и заметок. Этот класс должен иметь следующие методы:
-
-addTask(TaskItem task) - для добавления задачи в список.
-addNote(Note note) - для добавления заметки в список.
-displayAll() - для отображения всех задач и заметок в списке.
-getTask(int index) - для получения задачи по индексу.
-getNote(int index) - для получения заметки по индексу.
-Также создайте статический метод в классе "TaskList" для вывода общего количества задач в списке.
-
-Добавьте дружественную функцию, которая позволит сравнивать задачи по их приоритету. Приоритет представить как перечисление (enum).
-
-Перегрузите операторы сравнения (например, ==, !=, <, >), чтобы можно было сравнивать задачи и заметки.
-
-Создайте консольное меню для пользователя, позволяющее добавлять задачи и заметки,
-отмечать задачи как выполненные, отображать список задач и заметок, а также сравнивать задачи по приоритету.*/
 enum class Priority {
     Low,
     Medium,
     High
+};
+
+class TaskItem : public Task {
+private:
+    string title;
+    string description;
+    bool completed;
+    Priority priority;
+
+public:
+    TaskItem(string title_, string description_, Priority priority_) : title(title_), description(description_), completed(false), priority(priority_) {}
+
+    void display() const override {
+        cout << "Title: " << title << endl;
+        cout << "Description: " << description << endl;
+        cout << "Completed: " << (completed ? "Yes" : "No") << endl;
+    }
+
+    bool isCompleted() const override {
+        return completed;
+    }
+
+    void markAsCompleted() override {
+        completed = true;
+    }
+
+    Priority getPriority() const {
+        return priority;
+    }
 };
 
 class Note {
@@ -107,25 +70,23 @@ public:
         }
     }
 
-    TaskItem getTask(int index) {
+    TaskItem* getTask(int index) {
         if (index >= 0 && index < tasks.size()) {
-            return tasks[index];
+            return &tasks[index];
         } else {
-        // Возвращаем "пустую" задачу
-        return TaskItem();
+            return nullptr;
+        }
     }
-}
 
-  Note getNote(int index) {
-    if (index >= 0 && index < notes.size()) {
-        return notes[index];
-    } else {
-        // Возвращаем "пустую" заметку
-        return Note();
+    Note* getNote(int index) {
+        if (index >= 0 && index < notes.size()) {
+            return &notes[index];
+        } else {
+            return nullptr;
+        }
     }
-}
 
-    static int getTotalTasks() {
+    int getTotalTasks() const {
         return tasks.size();
     }
 
@@ -133,5 +94,87 @@ public:
 };
 
 bool compareByPriority(const TaskItem& task1, const TaskItem& task2) {
-    return task1.getPriority() > task2.getPriority();
+    return static_cast<int>(task1.getPriority()) > static_cast<int>(task2.getPriority());
+}
+int main() {
+    TaskList taskList;
+    int choice;
+
+    while (true) {
+        cout << "1. Add Task\";
+        cout << "2. Add Note\n";
+        cout << "3. Mark Task as Completed\n";
+        cout << "4. Display All Tasks and Notes\n";
+        cout << "5. Compare Tasks by Priority\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                string title, description;
+                int priority;
+                cout << "Enter task title: ";
+                cin >> title;
+                cout << "Enter task description: ";
+                cin >> description;
+                cout << "Enter task priority (0 for Low, 1 for Medium, 2 for High): ";
+                cin >> priority;
+                taskList.addTask(TaskItem(title, description, static_cast<Priority>(priority)));
+                break;
+            }
+            case 2: {
+                string text;
+                cout << "Enter note text: ";
+                cin >> text;
+                Note note;
+                note.text = text;
+                taskList.addNote(note);
+                break;
+            }
+            case 3: {
+                int index;
+                cout << "Enter task index to mark as completed: ";
+                cin >> index;
+                TaskItem* task = taskList.getTask(index);
+                if (task != nullptr) {
+                    task->markAsCompleted();
+                } else {
+                    cout << "Invalid task index.\n";
+                }
+                break;
+            }
+            case 4: {
+                taskList.displayAll();
+                break;
+            }
+            case 5: {
+                int index1, index2;
+                cout << "Enter first task index for comparison: ";
+                cin >> index1;
+                cout << "Enter second task index for comparison: ";
+                cin >> index2;
+                TaskItem* task1 = taskList.getTask(index1);
+                TaskItem* task2 = taskList.getTask(index2);
+                if (task1 != nullptr && task2 != nullptr) {
+                    if (compareByPriority(*task1, *task2)) {
+                        cout << "First task has higher priority.\n";
+                    } else {
+                        cout << "Second task has higher priority.\n";
+                    }
+                } else {
+                    cout << "Invalid task index.\n";
+                }
+                break;
+            }
+            case 6: {
+                return 0;
+            }
+            default: {
+                cout << "Invalid choice. Please try again.\n";
+            }
+        }
+    }
+
+    return 0;
 }
