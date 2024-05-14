@@ -29,7 +29,11 @@ public:
     void display() const override {
         cout << "Title: " << title << endl;
         cout << "Description: " << description << endl;
-        cout << "Completed: " << (completed ? "Yes" : "No") << endl;
+        if (completed) {
+            cout << "Completed: Yes" << endl;
+        } else {
+            cout << "Completed: No" << endl;
+        }
     }
 
     bool isCompleted() const override {
@@ -96,12 +100,13 @@ public:
 bool compareByPriority(const TaskItem& task1, const TaskItem& task2) {
     return static_cast<int>(task1.getPriority()) > static_cast<int>(task2.getPriority());
 }
+
 int main() {
     TaskList taskList;
     int choice;
 
     while (true) {
-        cout << "1. Add Task\";
+        cout << "1. Add Task\n";
         cout << "2. Add Note\n";
         cout << "3. Mark Task as Completed\n";
         cout << "4. Display All Tasks and Notes\n";
